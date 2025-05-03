@@ -14,6 +14,7 @@ namespace CodeHunt.API.Data
         public DbSet<Submission> Submissions { get; set; }
         public DbSet<TestCase> TestCases { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<CodeTemplate> CodeTemplates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

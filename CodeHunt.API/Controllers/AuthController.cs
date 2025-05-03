@@ -31,7 +31,8 @@ namespace CodeHunt.API.Controllers
             {
                 Name = dto.Name,
                 Email = dto.Email,
-                PasswordHash = dto.Password
+                PasswordHash = dto.Password,
+                RoleId = Guid.Parse("0AEB0E60-4B9F-4ED6-9460-DD4F79C7BD3E") 
             };
 
             var result = _auth.Register(user);
