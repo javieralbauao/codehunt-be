@@ -46,6 +46,7 @@ namespace CodeHunt.API.Services
 
         public string GenerateToken(User user)
         {
+            var jwtKey = _config["Jwt:Key"] ?? "";
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Name),
@@ -54,7 +55,7 @@ namespace CodeHunt.API.Services
                 new Claim(ClaimTypes.Role, user.Role.Name)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

@@ -33,6 +33,12 @@ namespace CodeHunt.API.Data
             modelBuilder.Entity<TestCase>()
                 .Property(t => t.IsPublic)
                 .HasDefaultValue(true);
+                
+            modelBuilder.Entity<CodeTemplate>()
+                .HasOne<Exercise>()
+                .WithMany()
+                .HasForeignKey(ct => ct.ExerciseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

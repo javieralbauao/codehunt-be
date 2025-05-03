@@ -18,10 +18,7 @@ namespace CodeHunt.API.Models
         [Required]
         public required string Template { get; set; }
 
-        [ForeignKey("ExerciseId")]
-        public Exercise Exercise { get; set; }
-
         [ForeignKey("LanguageId")]
-        public Language Language { get; set; }
+        public Language? Language { get; set; }
     }
 }

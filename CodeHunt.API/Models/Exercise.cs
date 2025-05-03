@@ -14,9 +14,6 @@ namespace CodeHunt.API.Models
         public string? FinalTestData { get; set; }
         public Guid LanguageId { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        public required Language Language { get; set; }
-        public required ICollection<TestCase> TestCases { get; set; }
         public ICollection<Submission>? Submissions { get; set; }
     }
 }
