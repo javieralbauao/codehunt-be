@@ -33,7 +33,7 @@ public class ExercisesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator, Student")]
     public IActionResult GetExercises()
     {
         var exercises = _context.Exercises
