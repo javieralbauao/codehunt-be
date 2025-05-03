@@ -8,17 +8,18 @@ using CodeHunt.API.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using CodeHunt.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeHunt.API.Services
 {
     public class AuthService
     {
         private readonly AppDbContext _context;
-        private readonly string _jwtKey = "clave_supersecreta_para_firmar_el_token";
-
-        public AuthService(AppDbContext context)
+        private readonly IConfiguration _config;
+        public AuthService(AppDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         public bool Register(User user)
@@ -28,13 +29,16 @@ namespace CodeHunt.API.Services
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
             _context.Users.Add(user);
-            _context.SaveChanges(); // 👈 Aquí se guarda en la DB
+            _context.SaveChanges();
             return true;
         }
 
         public User? ValidateUser(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email == email);
+
             if (user is null) return null;
 
             return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash) ? user : null;
@@ -46,10 +50,11 @@ namespace CodeHunt.API.Services
             {
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.Name)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CodeHunt.API.Models
 {
@@ -17,5 +18,12 @@ namespace CodeHunt.API.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<Submission> Submissions { get; set; }
+        
+        public Guid RoleId { get; set; }
+
+        [ForeignKey("RoleId")]
+        public Role Role { get; set; }
     }
 }
