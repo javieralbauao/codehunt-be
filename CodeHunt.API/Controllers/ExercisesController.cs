@@ -53,22 +53,22 @@ public class ExercisesController : ControllerBase
         return Ok(exercises);
     }
 
-[HttpDelete("{id}")]
-[Authorize(Roles = "Administrator")]
-public IActionResult DeleteExercise(Guid id)
-{
-    var exercise = _context.Exercises.FirstOrDefault(e => e.Id == id);
-    if (exercise == null)
-        return NotFound();
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
+    public IActionResult DeleteExercise(Guid id)
+    {
+        var exercise = _context.Exercises.FirstOrDefault(e => e.Id == id);
+        if (exercise == null)
+            return NotFound();
 
-    var templates = _context.CodeTemplates.Where(t => t.ExerciseId == id).ToList();
-    _context.CodeTemplates.RemoveRange(templates);
+        var templates = _context.CodeTemplates.Where(t => t.ExerciseId == id).ToList();
+        _context.CodeTemplates.RemoveRange(templates);
 
-    _context.Exercises.Remove(exercise);
-    _context.SaveChanges();
+        _context.Exercises.Remove(exercise);
+        _context.SaveChanges();
 
-    return NoContent();
-}
+        return NoContent();
+    }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Administrator")]
@@ -88,4 +88,54 @@ public IActionResult DeleteExercise(Guid id)
         return NoContent();
     }
 
+    [HttpPost("run")]
+    [Authorize(Roles = "Administrator, Student")]
+    public IActionResult RunCode([FromBody] RunCodeRequest request)
+    {
+        var exercise = _context.Exercises.FirstOrDefault(e => e.Id == request.ExerciseId);
+        if (exercise == null)
+            return NotFound();
+        string userOutput = SimulateExecution(request.Code ?? "", exercise.InitialTestData ?? "");
+        bool isCorrect = userOutput.Trim() == exercise.FinalTestData?.Trim();
+
+        return Ok(new
+        {
+            correct = isCorrect,
+            userOutput,
+            expectedOutput = exercise.FinalTestData
+        });
+    }
+
+    private string SimulateExecution(string code, string input)
+    {
+        // Por ahora simplemente devolvemos el "input" como "salida simulada"
+        return input; // Esta parte deberías reemplazarla por integración real
+    }
+
+    [HttpPost("submit")]
+    [Authorize(Roles = "Administrator, Student")]
+    public IActionResult SubmitCode([FromBody] SubmitSolutionRequest request)
+    {
+        var userId = User.Claims.ElementAt(2).Value;
+        if (userId == null) return Unauthorized();
+
+        var exercise = _context.Exercises.FirstOrDefault(e => e.Id == request.ExerciseId);
+        if (exercise == null) return NotFound();
+
+        var passed = request.Code?.Contains(exercise.FinalTestData  ?? ""); 
+
+        var submission = new Submission
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.Parse(userId),
+            ExerciseId = request.ExerciseId,
+            Code = request.Code ?? "",
+            Passed = passed
+        };
+
+        _context.Submissions.Add(submission);
+        _context.SaveChanges();
+
+        return Ok(new { message = "Código enviado", passed });
+    }
 }
