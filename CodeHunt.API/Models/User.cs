@@ -19,11 +19,11 @@ namespace CodeHunt.API.Models
 
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Submission> Submissions { get; set; }
+        public ICollection<Submission>? Submissions { get; set; }
         
         public Guid RoleId { get; set; }
 
         [ForeignKey("RoleId")]
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
     }
 }
